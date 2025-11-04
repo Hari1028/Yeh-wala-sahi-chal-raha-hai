@@ -186,13 +186,13 @@ def load_historical_schemas(table_name: str, num_history: int) -> List[Dict[str,
 # --- Constants (Unchanged) ---
 FILE_PATH = "ironclad.xlsx" 
 TABLE_NAME = None 
-DB_URL = "sqlite:///database/sample_data.db"
+#DB_URL = "sqlite:///database/sample_data.db"
 
 def run_validation_for_sheet(
     df: pd.DataFrame,
     file_path: str,
     sheet_name: Optional[str],
-    db_url: str,
+    #db_url: str,
     user_provided_table_name: Optional[str]
 ) -> (Dict[str, Any], Dict[str, Any], Optional[str]):
     """
@@ -226,7 +226,9 @@ def run_validation_for_sheet(
 
         # --- Step 3 (Sheet): LLM Schema Analysis (UPDATED) ---
         logging.info(f"--- [Sheet '{sheet_display_name}'] Step 2: LLM Schema Analysis ---")
-        engine = sqlalchemy.create_engine(db_url)
+        engine = tools.get_databricks_engine()
+        if engine is None:
+            raise ValueError("Failed to create Databricks engine. Check .env file and credentials.")
         db_schema = tools.get_db_schema(engine, target_table_name)
         if db_schema is None:
             raise ValueError(f"Database table '{target_table_name}' does not exist.")
@@ -358,7 +360,7 @@ def run_validation_for_sheet(
 
 
 # --- 9. Main Runner Function (Unchanged from last version) ---
-def run_multi_sheet_validation(file_path: str, db_url=DB_URL, user_provided_table_name: Optional[str] = None):
+def run_multi_sheet_validation(file_path: str, user_provided_table_name: Optional[str] = None):
     """
     Handles CSV or multi-sheet Excel validation by iterating through sheets.
     """
@@ -396,7 +398,7 @@ def run_multi_sheet_validation(file_path: str, db_url=DB_URL, user_provided_tabl
                 
                 sheet_report, schema_analysis_json, inferred_table = run_validation_for_sheet(
                     df=current_df, file_path=file_path, sheet_name=sheet_name,
-                    db_url=db_url, user_provided_table_name=user_provided_table_name
+                    #db_url=db_url, user_provided_table_name=user_provided_table_name
                 )
                 report_key = sheet_name if sheet_name is not None else "csv_data"
                 if report_key != "csv_data":

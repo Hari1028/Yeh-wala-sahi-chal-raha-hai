@@ -39,7 +39,7 @@ llm_config = {
 
 # --- 4. TOOL DEFINITIONS ---
 # This is our connection string, hardcoded for the POC
-DB_URL = "sqlite:///database/sample_data.db"
+#DB_URL = "sqlite:///database/sample_data.db"
 
 # TOOL 1: Your friend's profiler (placeholder)
 def run_data_profiling(
@@ -63,7 +63,7 @@ def run_schema_validation(
     try:
         final_report_dict = validation_module.run_multi_sheet_validation(
             file_path=file_path,
-            db_url=DB_URL,
+          #  db_url=DB_URL,
             user_provided_table_name=table_name
         )
         return json.dumps(final_report_dict)
@@ -86,7 +86,9 @@ def convert_json_to_markdown(
         return json.dumps({"error": str(e)})
 
 # TOOL 4: (NEW) The key to our fluid conversation
-def get_available_tables() -> Annotated[str, "A JSON list of available table names."]:
+# --- DELETE THIS ENTIRE FUNCTION ---
+# TOOL 4: (NEW) The key to our fluid conversation
+'''def get_available_tables() -> Annotated[str, "A JSON list of available table names."]:
     """Retrieves a list of all available table names from the database."""
     logging.info(f"... EXECUTING: get_available_tables() ...")
     try:
@@ -95,7 +97,7 @@ def get_available_tables() -> Annotated[str, "A JSON list of available table nam
         return json.dumps(list(schemas.keys()))
     except Exception as e:
         logging.error(f"... ERROR in get_available_tables: {e}")
-        return json.dumps({"error": str(e)})
+        return json.dumps({"error": str(e)})'''
 
 # --- 5. AGENT DEFINITIONS ---
 
@@ -169,7 +171,7 @@ markdown_agent = autogen.AssistantAgent(
 # We register each tool with its specific CALLER and the user_proxy as EXECUTOR.
 
 autogen.register_function(
-    get_available_tables,
+    tools.list_all_tables,
     caller=conductor_agent,
     executor=user_proxy, # <-- FIX
     name="get_available_tables",
